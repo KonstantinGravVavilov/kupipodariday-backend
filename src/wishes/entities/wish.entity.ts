@@ -40,7 +40,7 @@ export class Wish {
   @IsDecimal({ decimal_digits: '2' })
   price: number;
 
-  @Column('numeric')
+  @Column('numeric', { default: 0 })
   @IsDecimal({ decimal_digits: '2' })
   raised: number;
 

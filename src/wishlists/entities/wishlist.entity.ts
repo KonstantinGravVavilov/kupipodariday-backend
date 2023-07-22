@@ -29,7 +29,7 @@ export class Wishlist {
   @Length(1, 250)
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Length(1, 1500)
   description: string;
 
