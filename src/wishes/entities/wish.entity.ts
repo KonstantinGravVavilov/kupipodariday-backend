@@ -11,6 +11,7 @@ import {
   ManyToOne,
   OneToMany,
   ManyToMany,
+  JoinTable,
 } from 'typeorm';
 
 @Entity()
@@ -55,6 +56,7 @@ export class Wish {
   offers: Offer[];
 
   @ManyToMany(() => Wishlist, (wishlist) => wishlist.items)
+  @JoinTable()
   wishlists: Wishlist[];
 
   @Column()
