@@ -11,6 +11,9 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# Optional npm cache directory
+.env
+
 # OS
 .DS_Store
 
