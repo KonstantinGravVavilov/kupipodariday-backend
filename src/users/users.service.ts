@@ -1,9 +1,14 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { QueryFailedError, Repository } from 'typeorm';
 import { HashService } from 'src/hash/hash.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -13,7 +18,7 @@ export class UsersService {
     private hashService: HashService,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto) {
     const { password } = createUserDto;
     const hash = await this.hashService.generateHash(password);
     try {
@@ -35,7 +40,7 @@ export class UsersService {
     }
   }
 
-  async findByUsername(username: string): Promise<User> {
+  async findByUsername(username: string) {
     return await this.userRepository.findOne({
       select: {
         id: true,
@@ -48,17 +53,77 @@ export class UsersService {
     });
   }
 
-  async findOne(id: number): Promise<User> {
+  async getMe(id: number) {
     return await this.userRepository.findOneBy({ id });
   }
 
-  async findMany(query: string) {
-    return await this.userRepository.find({
-      where: [{ username: query }, { email: query }],
+  async getMyWishes(id: number) {
+    const data = await this.userRepository.findOne({
+      where: {
+        id,
+      },
+      relations: {
+        wishes: { owner: true, offers: true },
+      },
     });
+    return data.wishes;
   }
 
-  async remove(id: number) {
-    return await this.userRepository.delete({ id });
+  async getWishes(username: string) {
+    const user = await this.getByUsername(username);
+    const data = await this.userRepository.findOne({
+      where: {
+        id: user.id,
+      },
+      relations: {
+        wishes: { owner: true, offers: true },
+      },
+    });
+    return data.wishes;
+  }
+
+  async updateMe(updateUserDto: UpdateUserDto, id: number) {
+    const { password } = updateUserDto;
+    try {
+      if (password) {
+        const hash = await this.hashService.generateHash(password);
+        await this.userRepository.update(id, {
+          ...updateUserDto,
+          password: hash,
+        });
+      } else await this.userRepository.update(id, updateUserDto);
+      return await this.getMe(id);
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        const err = error.driverError;
+        if (err.code === '23505') {
+          throw new ConflictException(
+            'Пользователь с таким email или username уже зарегистрирован',
+          );
+        }
+      }
+    }
+  }
+
+  async getByUsername(username: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        username,
+      },
+    });
+    if (!user) throw new BadRequestException('Пользователь не найден');
+    return user;
+  }
+
+  async getManyByQuery(query: string) {
+    const user = await this.userRepository.find({
+      where: [{ username: query }, { email: query }],
+    });
+    if (!user.length) throw new BadRequestException('Пользователи не найдены');
+    return user;
+  }
+
+  async findOne(id: number) {
+    return await this.userRepository.findOneBy({ id });
   }
 }

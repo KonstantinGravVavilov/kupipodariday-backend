@@ -1,4 +1,4 @@
-import { Length, IsUrl, IsInt, IsDecimal } from 'class-validator';
+import { Length, IsUrl, IsInt } from 'class-validator';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
@@ -37,12 +37,19 @@ export class Wish {
   @IsUrl()
   image: string;
 
-  @Column('numeric')
-  @IsDecimal({ decimal_digits: '2' })
+  @Column({
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+  })
   price: number;
 
-  @Column('numeric', { default: 0 })
-  @IsDecimal({ decimal_digits: '2' })
+  @Column({
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+    default: 0,
+  })
   raised: number;
 
   @ManyToOne(() => User, (user) => user.wishes)
@@ -59,7 +66,7 @@ export class Wish {
   @JoinTable()
   wishlists: Wishlist[];
 
-  @Column()
+  @Column({ default: 0 })
   @IsInt()
   copied: number;
 }
