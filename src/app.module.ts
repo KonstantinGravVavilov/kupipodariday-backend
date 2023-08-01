@@ -25,7 +25,7 @@ import { AuthModule } from './auth/auth.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       entities: [User, Wish, Wishlist, Offer],
-      synchronize: true,
+      synchronize: false,
     }),
     UsersModule,
     WishesModule,

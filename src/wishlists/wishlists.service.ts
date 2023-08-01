@@ -2,12 +2,14 @@ import {
   Injectable,
   ForbiddenException,
   ConflictException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wishlist } from './entities/wishlist.entity';
 import { Repository, QueryFailedError } from 'typeorm';
+import { ERR_WISH_NOT_EXIST } from 'src/constants';
 
 @Injectable()
 export class WishlistsService {
@@ -51,17 +53,25 @@ export class WishlistsService {
     userId: number,
   ) {
     const wishlist = await this.findOne(id);
+    if (!wishlist)
+      throw new NotFoundException('Вишлиста с таким id не существует');
     if (wishlist.owner.id !== userId)
       throw new ForbiddenException('Редактировать чужие вишлисты нельзя');
 
     const { itemsId } = updateWishlistDto;
-    const items = itemsId.map((id) => ({ id }));
+    const items = itemsId ? itemsId.map((id) => ({ id })) : undefined;
     try {
-      await this.wishlistRepository.save({ ...wishlist, items });
+      delete updateWishlistDto.itemsId;
+      await this.wishlistRepository.save({
+        ...updateWishlistDto,
+        id,
+        items,
+        owner: { id: userId },
+      });
     } catch (err) {
       if (err instanceof QueryFailedError) {
         const error = err.driverError;
-        if (error.code === '23503') {
+        if (error.code === ERR_WISH_NOT_EXIST) {
           throw new ConflictException(
             'Подарка, который вы хотите добавить в вишлист, не существует',
           );

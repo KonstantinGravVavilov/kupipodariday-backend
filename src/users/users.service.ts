@@ -9,6 +9,7 @@ import { User } from './entities/user.entity';
 import { QueryFailedError, Repository } from 'typeorm';
 import { HashService } from 'src/hash/hash.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ERR_USER_EXIST } from 'src/constants';
 
 @Injectable()
 export class UsersService {
@@ -31,7 +32,7 @@ export class UsersService {
     } catch (error) {
       if (error instanceof QueryFailedError) {
         const err = error.driverError;
-        if (err.code === '23505') {
+        if (err.code === ERR_USER_EXIST) {
           throw new ConflictException(
             'Пользователь с таким email или username уже зарегистрирован',
           );
@@ -96,7 +97,7 @@ export class UsersService {
     } catch (error) {
       if (error instanceof QueryFailedError) {
         const err = error.driverError;
-        if (err.code === '23505') {
+        if (err.code === ERR_USER_EXIST) {
           throw new ConflictException(
             'Пользователь с таким email или username уже зарегистрирован',
           );
