@@ -13,10 +13,11 @@
 - Error Handling
 
 ## Technologies
-![TypeScript](https://img.shields.io/badge/-TypeScript-333?&logo=TypeScript) 
-
 ![Nest.js](https://img.shields.io/badge/-Nest.js-333?&logo=Nestjs)
 ![Express](https://img.shields.io/badge/-Express-333?&logo=Express)
 ![PostgreSQL](https://img.shields.io/badge/-PostgreSQL-333?&logo=PostgreSQL)
+![TypeOrm](https://img.shields.io/badge/-TypeORM-333)
+
+![TypeScript](https://img.shields.io/badge/-TypeScript-333?&logo=TypeScript) 
 
 ![REST API](https://img.shields.io/badge/-REST_API-333?style=flat)
