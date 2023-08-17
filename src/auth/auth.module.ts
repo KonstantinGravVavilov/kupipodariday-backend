@@ -7,18 +7,19 @@ import { JwtModule } from '@nestjs/jwt';
 import { HashModule } from 'src/hash/hash.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: '.env.development',
-    }),
     UsersModule,
     PassportModule,
     HashModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get('jwt').secret,
+      }),
     }),
   ],
   controllers: [AuthController],
